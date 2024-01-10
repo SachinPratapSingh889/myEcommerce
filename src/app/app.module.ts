@@ -1,11 +1,11 @@
-import { NgModule } from '@angular/core';
+import { Injector, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
 import { ProductListComponent } from './components/product-list/product-list.component';
 import { HttpClientModule } from '@angular/common/http';
 import { ProductService } from './services/product.service';
-import { Routes, RouterModule } from '@angular/router';
+import { Routes, RouterModule, Router } from '@angular/router';
 import { ProductCategoryMenuComponent } from './components/product-category-menu/product-category-menu.component';
 import { SearchComponent } from './components/search/search.component';
 import { MasterViewComponent } from './components/master-view/master-view.component';
@@ -16,9 +16,46 @@ import { CheckoutComponent } from './components/checkout/checkout.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CheckoutService } from './checkout.service';
+import { LoginComponent } from './components/login/login.component';
+import { LoginStatusComponent } from './components/login-status/login-status.component';
+import {
+  OktaAuthModule,
+  OktaCallbackComponent,
+  OKTA_CONFIG,
+  OktaAuthGuard
+} from '@okta/okta-angular';
+import {OktaAuth} from '@okta/okta-auth-js';
+import myAppConfig from './config/my-app-config';
+import { MembersComponent } from './components/members/members.component';
 
+
+const oktaConfig = myAppConfig.oidc;
+
+const oktaAuth= new OktaAuth(oktaConfig);
+
+function sendToLoginPage(oktaAuth: OktaAuth, injector: Injector){
+    // Use injector to access any serviece available within your application
+   const router= injector.get(Router);
+
+    //Redirect the user to your custom login page
+    router.navigate(['/login'])
+}
 
 const routes: Routes = [
+  {
+    path: 'members',
+    component: MembersComponent,
+    canActivate: [OktaAuthGuard],
+    data: {onAuthRequired: sendToLoginPage}
+  },
+  {
+    path: 'login/callback',
+    component: OktaCallbackComponent,
+  },
+  {
+    path: 'login',
+    component: LoginComponent,
+  },
   {
     path: 'catagory/:id',
     component: ProductListComponent,
@@ -68,17 +105,21 @@ const routes: Routes = [
     CartStatusComponent,
     CartDetailsComponent,
     CheckoutComponent,
+    LoginComponent,
+    LoginStatusComponent,
+    MembersComponent,
   ],
   imports: [
+    RouterModule.forRoot(routes),
     BrowserModule,
     HttpClientModule,
-    RouterModule.forRoot(routes),
     NgbModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    OktaAuthModule,
   ],
   schemas: [ CUSTOM_ELEMENTS_SCHEMA ],
 
-  providers: [ProductService , CheckoutService],
+  providers: [ProductService , CheckoutService , {provide: OKTA_CONFIG, useValue:{oktaAuth}}],
   bootstrap: [AppComponent],
 })
 export class AppModule { }
