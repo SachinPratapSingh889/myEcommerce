@@ -19,6 +19,8 @@ import { ShopValidators } from 'src/app/validators/shop-validators';
 export class CheckoutComponent implements OnInit {
 
 
+  storage: Storage= sessionStorage;
+
   checkoutFormGroup: FormGroup;
 
   totalPrice: number = 0;
@@ -35,11 +37,13 @@ export class CheckoutComponent implements OnInit {
 
 
   ngOnInit(): void {
+     const theEmail =  JSON.parse(this.storage.getItem('userEmail'));
+
     this.checkoutFormGroup = this.formBuilder.group({
       customer: this.formBuilder.group({
         firstName: new FormControl('', [Validators.required, Validators.minLength(2), ShopValidators.notOnlyWhiteSpace]),
         lastName: new FormControl('', [Validators.required, Validators.minLength(2), ShopValidators.notOnlyWhiteSpace]),
-        email: new FormControl('', [Validators.required, Validators.pattern('^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$')])
+        email: new FormControl(theEmail, [Validators.required, Validators.pattern('^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$')])
       }),
       shippingAddress: this.formBuilder.group({
         street: new FormControl('', [Validators.required, , Validators.minLength(2), ShopValidators.notOnlyWhiteSpace]),

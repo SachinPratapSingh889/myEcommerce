@@ -6,6 +6,7 @@
     <button class="security-btn" *ngIf="!isAuthenticated" routerLink="/login">Login</button>
     <button class="security-btn" *ngIf="isAuthenticated" (click)="logOut()">Logout</button>
     <button class="ms-1 security-btn" *ngIf="isAuthenticated" routerLink="/members">Member</button>
+    <button class="ms-1 security-btn" *ngIf="isAuthenticated" routerLink="/order-history">Orders</button>
 
 
 </div>
