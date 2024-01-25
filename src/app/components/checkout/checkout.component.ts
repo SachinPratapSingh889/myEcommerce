@@ -5,11 +5,13 @@ import { CheckoutService } from 'src/app/checkout.service';
 import { Country } from 'src/app/common/country';
 import { Order } from 'src/app/common/order';
 import { OrderItem } from 'src/app/common/order-item';
+import { PaymentInfo } from 'src/app/common/payment-info';
 import { Purchase } from 'src/app/common/purchase';
 import { State } from 'src/app/common/state';
 import { CartService } from 'src/app/services/cart.service';
 import { ShopFormService } from 'src/app/services/shop-form.service';
 import { ShopValidators } from 'src/app/validators/shop-validators';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-checkout',
@@ -33,11 +35,22 @@ export class CheckoutComponent implements OnInit {
   shippingAddressStates: State[] = [];
   billingAddressStates: State[] = [];
 
-  constructor(private formBuilder: FormBuilder, private shopForm: ShopFormService, private cartService: CartService, private checkoutService: CheckoutService, private router: Router) { }
+  //Initialize stripe api
+  stripe= Stripe(environment.stripePublishKey);
+  paymentInfo: PaymentInfo= new PaymentInfo();
+  cardElement: any;
+  displayError: any="";
+
+  constructor(private formBuilder: FormBuilder,
+             private shopForm: ShopFormService, 
+             private cartService: CartService,
+             private checkoutService: CheckoutService, 
+             private router: Router,
+             ) { }
 
 
   ngOnInit(): void {
-     const theEmail =  JSON.parse(this.storage.getItem('userEmail'));
+    const theEmail =  JSON.parse(this.storage.getItem('userEmail'));
 
     this.checkoutFormGroup = this.formBuilder.group({
       customer: this.formBuilder.group({
@@ -59,35 +72,36 @@ export class CheckoutComponent implements OnInit {
         country: new FormControl('', [Validators.required, ShopValidators.notOnlyWhiteSpace]),
         zipCode: new FormControl('', [Validators.required, Validators.minLength(6), ShopValidators.notOnlyWhiteSpace]),
       }),
-      creditCard: this.formBuilder.group({
-        cardType: new FormControl('', [Validators.required, ShopValidators.notOnlyWhiteSpace]),
-        nameOnCard: new FormControl('', [Validators.required, Validators.minLength(2), ShopValidators.notOnlyWhiteSpace]),
-        cardNumber: new FormControl('', [Validators.required, Validators.pattern('^[0-9]{16}$'), ShopValidators.notOnlyWhiteSpace]),
-        securityCode: new FormControl('', [Validators.required, Validators.pattern('^[0-9]{3}$'), ShopValidators.notOnlyWhiteSpace]),
-        expirationMonth: new FormControl(''),
-        expirationYear: new FormControl(''),
-      })
+      // creditCard: this.formBuilder.group({
+      //   cardType: new FormControl('', [Validators.required, ShopValidators.notOnlyWhiteSpace]),
+      //   nameOnCard: new FormControl('', [Validators.required, Validators.minLength(2), ShopValidators.notOnlyWhiteSpace]),
+      //   cardNumber: new FormControl('', [Validators.required, Validators.pattern('^[0-9]{16}$'), ShopValidators.notOnlyWhiteSpace]),
+      //   securityCode: new FormControl('', [Validators.required, Validators.pattern('^[0-9]{3}$'), ShopValidators.notOnlyWhiteSpace]),
+      //   expirationMonth: new FormControl(''),
+      //   expirationYear: new FormControl(''),
+      // })
+
     })
 
     //populate credit card month
 
-    const startMonth: number = new Date().getMonth() + 1;
-    console.log(startMonth);
+    // const startMonth: number = new Date().getMonth() + 1;
+    // console.log(startMonth);
 
-    this.shopForm.getCreditCardMonths(startMonth).subscribe(
-      data => {
-        console.log("Retrived credit card months:" + JSON.stringify(data));
-        this.creditCardMonth = data;
-      }
-    )
+    // this.shopForm.getCreditCardMonths(startMonth).subscribe(
+    //   data => {
+    //     console.log("Retrived credit card months:" + JSON.stringify(data));
+    //     this.creditCardMonth = data;
+    //   }
+    // )
 
-    //populate credit card years
-    this.shopForm.getCreditCardYears().subscribe(
-      data => {
-        console.log("Retrived credit card months:" + JSON.stringify(data));
-        this.creditCardYears = data;
-      }
-    )
+    // //populate credit card years
+    // this.shopForm.getCreditCardYears().subscribe(
+    //   data => {
+    //     console.log("Retrived credit card months:" + JSON.stringify(data));
+    //     this.creditCardYears = data;
+    //   }
+    // )
 
 
     //populate the countries
@@ -100,7 +114,10 @@ export class CheckoutComponent implements OnInit {
 
 
     this.reviewCardDetails();
+    //setup stripe payment code
+    this.setupStripePaymentForm();
   }
+  
   onSubmit() {
     console.log(`Purchasing the items`);
     console.log(this.checkoutFormGroup.get('customer').value)
@@ -274,6 +291,32 @@ export class CheckoutComponent implements OnInit {
     this.cartService.totalPrice.subscribe(
       data => this.totalPrice = data
     )
+  }
+
+  setupStripePaymentForm() {
+
+    //get a handle to stripe element
+    var elements= this.stripe.elements();
+
+    //craete a card element.......... and hide th zip code field
+    this.cardElement= elements.create('card' , {hidePostalCode : true});
+
+    //add an instance of card ui comp into the 'card-element' div
+    this.cardElement.mount('#card-element');
+
+    //add event binding for the 'change' envent on the card element
+    this.cardElement.on('change', (event: any)=>{
+
+      //get a handle to card-errors elements
+      this.displayError= document.getElementById('card-errors');
+
+      if (event.complete) {
+         this.displayError.textContent=  "";
+      }else if(event.error){
+        //show validation error to the customer
+        this.displayError.textContent= event.error.message;
+      }
+    })
   }
 
 }

@@ -286,116 +286,16 @@
 
                 </div>
 
-                <!-- credit card -->
-                <div formGroupName="creditCard" class="form-area">
-                    <h3>Credit Card</h3>
-                    <div class="row">
-                        <div class="col-md-2">
-                            <label>Card type</label>
-                        </div>
-                        <div class="col-md-5">
-                            <div class="input-space">
-                                <select formControlName="cardType">
-                                    <option>Visa</option>
-                                    <option>Mastercard</option>
-                                    <option>Rupay</option>
-                                </select>
-                                <div *ngIf="cardCardType.invalid && (cardCardType.dirty || cardCardType.touched)"
-                                class="alert alert-danger mt-1">
-                                <div *ngIf="cardCardType.errors.required || cardCardType.errors.notOnlyWhiteSpace">
-                                    Card Type is reuired
-                                </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-2">
-                            <label>Name on card</label>
-                        </div>
-                        <div class="col-md-5">
-                            <div class="input-space">
-                                <input type="text" formControlName="nameOnCard">
-                                <div *ngIf="cardCardName.invalid && (cardCardName.dirty || cardCardName.touched)"
-                                    class="alert alert-danger mt-1">
-                                    <div *ngIf="cardCardName.errors.required || cardCardName.errors.notOnlyWhiteSpace">
-                                        Card Owner is reuired
-                                    </div>
-                                    <div *ngIf="cardCardName.errors.minlength">
-                                        Card Owner must be atleast 2 characters
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-2">
-                            <label>Card number</label>
-                        </div>
-                        <div class="col-md-5">
-                            <div class="input-space">
-                                <input type="text" formControlName="cardNumber">
-                                <div *ngIf="cardCardNumber.invalid && (cardCardNumber.dirty || cardCardNumber.touched)"
-                                    class="alert alert-danger mt-1">
-                                    <div *ngIf="cardCardNumber.errors.required || cardCardNumber.errors.notOnlyWhiteSpace">
-                                        Card Owner is reuired
-                                    </div>
-                                    <div *ngIf="cardCardNumber.errors.pattern">
-                                        Card Owner must be of 16 numbers
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                <!-- Stripe elements credit cards section -->
+                <div class="form-area" formGroupName="creditCard">
+                    <h3>Credit or debit card</h3>
+
+                    <div id="card-element">
+                        <!-- A Stripe element ll be inserted here -->
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-2">
-                            <label>Security code</label>
-                        </div>
-                        <div class="col-md-5">
-                            <div class="input-space">
-                                <input type="text" formControlName="securityCode">
-                                <div *ngIf="cardCardSecurityCode.invalid && (cardCardSecurityCode.dirty || cardCardSecurityCode.touched)"
-                                    class="alert alert-danger mt-1">
-                                    <div *ngIf="cardCardSecurityCode.errors.required || cardCardSecurityCode.errors.notOnlyWhiteSpace">
-                                        Security Code is reuired
-                                    </div>
-                                    <div *ngIf="cardCardSecurityCode.errors.pattern">
-                                        Security Code must be of 3 digits
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-2">
-                            <label>Expiration month</label>
-                        </div>
-                        <div class="col-md-5">
-                            <div class="input-space">
-                                <select formControlName="expirationMonth">
-                                    <option *ngFor="let month of creditCardMonth">
-                                        {{month}}
-                                    </option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-2">
-                            <label>Expiration year</label>
-                        </div>
-                        <div class="col-md-5">
-                            <div class="input-space">
-                                <select formControlName="expirationYear" (change)="updateMonthsandYears()">
-                                    <option *ngFor="let years of creditCardYears">
-                                        {{years}}
-                                    </option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
+                    <!-- Used to display form errors -->
+                    <div id="card-errors" class="displayError.textContent!=='': 'alert alert-danger mt-1'"></div>
                 </div>
 
 
